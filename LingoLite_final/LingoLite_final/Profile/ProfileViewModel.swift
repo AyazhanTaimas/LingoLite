@@ -16,8 +16,7 @@ class ProfileViewModel: ObservableObject {
                     id: uid,
                     name: data["name"] as? String ?? "No Name",
                     email: Auth.auth().currentUser?.email ?? "",
-                    birthdate: data["birthdate"] as? String ?? "Unknown",
-                    photoURL: data["photoURL"] as? String
+                    birthdate: data["birthdate"] as? String ?? "Unknown"
                 )
 
             } else {

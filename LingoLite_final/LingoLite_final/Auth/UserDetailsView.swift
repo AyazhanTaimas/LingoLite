@@ -1,8 +1,6 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
-import FirebaseStorage
-import PhotosUI
 
 struct UserDetailsView: View {
     @State private var name = ""
@@ -11,15 +9,12 @@ struct UserDetailsView: View {
     @State private var errorMessage = ""
     @State private var isSaved = false
 
-    @State private var selectedImage: UIImage?
-    @State private var showImagePicker = false
-
     var body: some View {
         ZStack {
             Color(hex: "#FFE66D").ignoresSafeArea()
 
             VStack(spacing: 24) {
-                // 🔶 Top Bar
+                // 🔶 Верхняя панель
                 HStack {
                     Text("←  Please tell us a bit about yourself.")
                         .font(.system(size: 18, weight: .semibold))
@@ -29,27 +24,11 @@ struct UserDetailsView: View {
                 }
                 .background(Color(hex: "#FFE66D"))
 
-                // 🧑 Avatar Picker
-                Button(action: {
-                    showImagePicker = true
-                }) {
-                    if let image = selectedImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 150, height: 150)
-                            .clipShape(Circle())
-                            .clipped()
-                    } else {
-                        Circle()
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                            .frame(width: 150, height: 150)
-                            .overlay(Text("place image").foregroundColor(.blue))
-                    }
-                }
-                .sheet(isPresented: $showImagePicker) {
-                    ImagePicker(selectedImage: $selectedImage)
-                }
+                // 🧑 Заглушка аватара
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                    .frame(width: 150, height: 150)
+                    .overlay(Text("place image").foregroundColor(.blue))
 
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Your name:")
@@ -114,38 +93,15 @@ struct UserDetailsView: View {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         let db = Firestore.firestore()
 
-        uploadProfileImage(uid: uid) { imageURL in
-            db.collection("users").document(uid).setData([
-                "name": name,
-                "birthdate": formattedDate(birthdate),
-                "reason": reason,
-                "photoURL": imageURL ?? ""
-            ]) { error in
-                if let error = error {
-                    errorMessage = "❌ Failed to save: \(error.localizedDescription)"
-                } else {
-                    isSaved = true
-                }
-            }
-        }
-    }
-
-    private func uploadProfileImage(uid: String, completion: @escaping (String?) -> Void) {
-        guard let imageData = selectedImage?.jpegData(compressionQuality: 0.8) else {
-            completion(nil)
-            return
-        }
-
-        let ref = Storage.storage().reference().child("profile_images/\(uid).jpg")
-        ref.putData(imageData, metadata: nil) { _, error in
+        db.collection("users").document(uid).setData([
+            "name": name,
+            "birthdate": formattedDate(birthdate),
+            "reason": reason
+        ]) { error in
             if let error = error {
-                print("Upload error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-
-            ref.downloadURL { url, _ in
-                completion(url?.absoluteString)
+                errorMessage = "❌ Failed to save: \(error.localizedDescription)"
+            } else {
+                isSaved = true
             }
         }
     }

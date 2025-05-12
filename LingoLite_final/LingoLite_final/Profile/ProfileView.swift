@@ -29,21 +29,10 @@ struct ProfileView: View {
             if let user = viewModel.userProfile {
                 Spacer().frame(height: 24)
 
-                // 🔵 Аватар-заглушка
-                if let urlString = user.photoURL, let url = URL(string: urlString) {
-                    AsyncImage(url: url) { image in
-                        image.resizable()
-                    } placeholder: {
-                        ProgressView()
-                    }
+                // 🔵 Аватар-заглушка (без фото)
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
                     .frame(width: 150, height: 150)
-                    .clipShape(Circle())
-                } else {
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 150, height: 150)
-                }
-
 
                 // 🔤 Имя
                 Text(user.name)
@@ -76,9 +65,10 @@ struct ProfileView: View {
                     Button("SIGN OUT") {
                         do {
                             try authViewModel.signOut()
-                            // Перейти обратно к экрану входа
                             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                                scene.windows.first?.rootViewController = UINavigationController(rootViewController: UIHostingController(rootView: SignInView()))
+                                scene.windows.first?.rootViewController = UINavigationController(
+                                    rootViewController: UIHostingController(rootView: SignInView())
+                                )
                                 scene.windows.first?.makeKeyAndVisible()
                             }
                         } catch {

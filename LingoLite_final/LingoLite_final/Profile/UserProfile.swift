@@ -5,5 +5,4 @@ struct UserProfile: Identifiable {
     var name: String
     var email: String
     var birthdate: String
-    var photoURL: String?
 }
